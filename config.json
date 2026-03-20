@@ -1,0 +1,28 @@
+{
+  "programs": [
+    {
+      "program_id": "54dea6cf-5645-497b-a287-723c18207fce",
+      "path": "C:/Users/Administrator/PycharmProjects/MIDI处理整合/MIDI速度转换/main.py",
+      "name": "MIDI处理",
+      "args": "",
+      "workdir": "C:\\Users\\Administrator\\PycharmProjects\\MIDI处理整合\\MIDI速度转换",
+      "interpreter": ""
+    },
+    {
+      "program_id": "5247ebc8-cf4a-41a9-9ae9-c92d386afe17",
+      "path": "C:/Users/Administrator/PycharmProjects/文件筛选工具/file_selector.py",
+      "name": "文件处理",
+      "args": "",
+      "workdir": "C:\\Users\\Administrator\\PycharmProjects\\文件筛选工具",
+      "interpreter": ""
+    },
+    {
+      "program_id": "115a5095-3644-482a-a531-c367426c0d35",
+      "path": "D:/MSST WebUI/client.py",
+      "name": "client",
+      "args": "",
+      "workdir": "D:\\MSST WebUI",
+      "interpreter": "D:/MSST WebUI/workenv/python.exe"
+    }
+  ]
+}

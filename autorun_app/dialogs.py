@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -13,6 +15,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPlainTextEdit,
     QPushButton,
     QVBoxLayout,
@@ -111,9 +114,73 @@ class ProgramDialog(QDialog):
             self.workdir_input.setText(path)
 
     def _browse_interpreter(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, "选择解释器/运行时")
-        if path:
-            self.interpreter_input.setText(path)
+        dialog = QFileDialog(self, "选择解释器/运行时")
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dialog.setNameFilter("可执行文件 (*.exe *.bat *.cmd);;所有文件 (*)")
+        dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
+        current = self.interpreter_input.text().strip()
+        if current and Path(current).parent.exists():
+            dialog.setDirectory(str(Path(current).parent))
+        elif os.name == "nt":
+            dialog.setDirectory("C:\\")
+        if not dialog.exec():
+            return
+        selected = dialog.selectedFiles()
+        if not selected:
+            return
+        raw_path = selected[0]
+        normalized = self._normalize_interpreter_path(raw_path)
+        if normalized and Path(normalized).exists():
+            self.interpreter_input.setText(normalized)
+            return
+        QMessageBox.warning(
+            self,
+            "解释器路径不可用",
+            f"系统无法访问该文件：\n{raw_path}\n\n请尝试选择真实 python.exe（非 WindowsApps 别名）。",
+        )
+
+    @staticmethod
+    def _normalize_interpreter_path(path: str) -> str:
+        candidate = Path(path)
+        if candidate.exists():
+            return str(candidate)
+        if os.name != "nt":
+            return path
+        lower = str(candidate).lower()
+        if candidate.name.lower() != "python.exe":
+            return path
+        if "windowsapps" not in lower and candidate.is_absolute():
+            return path
+        try:
+            completed = subprocess.run(
+                ["where", "python"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=1.0,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+            )
+        except Exception:
+            return path
+        if completed.returncode != 0:
+            return path
+        lines = [line.strip() for line in (completed.stdout or "").splitlines() if line.strip()]
+        preferred = []
+        fallback = []
+        for line in lines:
+            p = Path(line)
+            if not p.exists():
+                continue
+            if "windowsapps" in str(p).lower():
+                fallback.append(str(p))
+            else:
+                preferred.append(str(p))
+        if preferred:
+            return preferred[0]
+        if fallback:
+            return fallback[0]
+        return path
 
 
 class OutputDialog(QDialog):

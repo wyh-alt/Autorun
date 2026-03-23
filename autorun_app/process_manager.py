@@ -7,7 +7,6 @@ import os
 import re
 import shlex
 import subprocess
-import sys
 import threading
 import time
 from collections import deque
@@ -643,7 +642,7 @@ class ProcessManager:
         args = self._parse_args(program.args)
         runtime = program.interpreter.strip()
         if suffix in {".py", ".pyw"}:
-            interpreter = runtime or sys.executable
+            interpreter = runtime or "python"
             return [interpreter, str(path), *args]
         if suffix in {".js", ".mjs", ".cjs"}:
             interpreter = runtime or "node"

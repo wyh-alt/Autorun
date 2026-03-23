@@ -352,7 +352,7 @@ class MainWindow(QMainWindow):
         choice = QMessageBox.question(
             self,
             "解释器提醒",
-            "当前 .py 程序未设置解释器，可能会使用默认 Python 运行。\n是否继续？",
+            "当前 .py 程序未设置解释器，将使用系统 PATH 中的 python 命令运行。\n是否继续？",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
@@ -380,7 +380,7 @@ class MainWindow(QMainWindow):
         for idx, program in enumerate(missing, start=1):
             title = program.display_name.strip() or f"程序{idx}"
             lines.append(f"{idx}. {title} | {program.path}")
-        message = "以下 .py 程序未设置解释器，可能会使用默认 Python 运行：\n\n" + "\n".join(lines) + "\n\n是否继续运行所有？"
+        message = "以下 .py 程序未设置解释器，将使用系统 PATH 中的 python 命令运行：\n\n" + "\n".join(lines) + "\n\n是否继续运行所有？"
         choice = QMessageBox.question(
             self,
             "解释器提醒",

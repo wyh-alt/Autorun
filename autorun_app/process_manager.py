@@ -207,15 +207,10 @@ class ProcessManager:
                     continue
                 code = proc.poll()
                 if code is None:
-                    if state.runtime_error_detected:
-                        program.status = ProgramStatus.ERROR
-                        if state.runtime_error_message:
-                            program.last_error = state.runtime_error_message
-                        if not state.runtime_error_logged:
-                            self._append_log(program, event="运行异常", detail=state.runtime_error_message or "检测到异常堆栈")
-                            state.runtime_error_logged = True
-                    else:
-                        program.status = ProgramStatus.RUNNING
+                    program.status = ProgramStatus.RUNNING
+                    if state.runtime_error_detected and not state.runtime_error_logged:
+                        self._append_log(program, event="运行告警", detail=state.runtime_error_message or "检测到异常堆栈")
+                        state.runtime_error_logged = True
                     continue
                 state.process = None
                 state.cpu_percent = None
@@ -227,10 +222,6 @@ class ProcessManager:
                     program.status = ProgramStatus.STOPPED
                     program.last_error = ""
                     self._append_log(program, event="退出", detail=f"停止后退出，返回码 {code}")
-                elif state.runtime_error_detected:
-                    program.status = ProgramStatus.ERROR
-                    program.last_error = state.runtime_error_message or f"运行异常退出，返回码: {code}"
-                    self._append_log(program, event="异常退出", detail=program.last_error)
                 elif code == 0:
                     program.status = ProgramStatus.STOPPED
                     program.last_error = ""
@@ -714,9 +705,11 @@ class ProcessManager:
                             state.runtime_error_detected = True
                             state.runtime_error_message = text.strip()
                             state.traceback_pending = False
+                            state.runtime_error_logged = False
                     elif "Unhandled exception" in text:
                         state.runtime_error_detected = True
                         state.runtime_error_message = text.strip()
+                        state.runtime_error_logged = False
         except Exception as exc:
             with self._lock:
                 state = self._runtime.get(program_id)
